@@ -138,6 +138,14 @@ Aprire il browser:
 Output previsto:
 
     Hello World!
+Altrimenti se l'output desiderato è Hello + Nome!
+Aprire il browser:
+
+    http://localhost:8080/hello/Nome
+
+Output previsto:
+
+    Hello Nome!
 
 ------------------------------------------------------------------------
 
