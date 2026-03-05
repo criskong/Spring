@@ -1,4 +1,4 @@
-package main.java.com.criskong.OrderApp.Entity;
+package com.criskong.OrderApp.Entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

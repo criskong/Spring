@@ -8,11 +8,20 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 import java.util.List;
 
 import com.criskong.OrderApp.repository.FoodItemRepository;
 import com.criskong.OrderApp.Entity.FoodItem;
+
+/**
+ * Questa classe rappresenta un Controller in Spring.
+ *
+ * In Spring Boot:
+ * - Un Controller gestisce le richieste HTTP provenienti dal client (browser o API consumer).
+ * - Riceve le richieste tramite endpoint definiti con annotazioni come @GetMapping, @PostMapping, ecc.
+ * - Elabora la richiesta (spesso delegando la logica ai Service).
+ * - Restituisce una risposta al client (una view, JSON, o altri dati).
+ */
 
 @RestController
 @RequestMapping("/api/foods")
