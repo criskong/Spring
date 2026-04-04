@@ -1,13 +1,7 @@
 package com.criskong.OrderApp.Controller;
 
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.RequestMapping;
-
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 import com.criskong.OrderApp.repository.FoodItemRepository;
@@ -33,37 +27,48 @@ public class FoodItemController {
         this.foodItemRepository = foodItemRepository;
     }
 
-    //Endpoint per ottenere tutti gli articoli alimentari
+    // GET /api/foods — tutti gli articoli
     @GetMapping
     public List<FoodItem> getAllFoodItems() {
         return foodItemRepository.findAll();
     }
-    //Endpoint per creare un nuovo articolo alimentare
+
+    // POST /api/foods — crea un nuovo articolo
     @PostMapping
-    public FoodItem createFoodItem(FoodItem foodItem) {
+    public FoodItem createFoodItem(@RequestBody FoodItem foodItem) { // ← aggiunto @RequestBody
         return foodItemRepository.save(foodItem);
     }
-    //Endpoint per ottenere un articolo alimentare specifico per id
+
+    // GET /api/foods/{id} — articolo per id
     @GetMapping("/{id}")
-    public FoodItem getFoodItemById(@PathVariable Long id) {
-        return foodItemRepository.findById(id).orElse(null);
+    public ResponseEntity<FoodItem> getFoodItemById(@PathVariable Long id) {
+        return foodItemRepository.findById(id)
+                .map(ResponseEntity::ok)                        // ← restituisce 200 con il dato
+                .orElse(ResponseEntity.notFound().build());     // ← restituisce 404 se non trovato
     }
 
-    //Endpoint per aggiornare un articolo alimentare esistente
+    // PUT /api/foods/{id} — aggiorna un articolo esistente
     @PutMapping("/{id}")
-    public FoodItem updateFoodItem(@PathVariable Long id, FoodItem foodItemDetails) {
-        FoodItem foodItem = foodItemRepository.findById(id).orElse(null);
-        if (foodItem != null) {
-            foodItem.setName(foodItemDetails.getName());
-            foodItem.setPrice(foodItemDetails.getPrice());
-        }
-        return foodItemRepository.save(foodItem);
+    public ResponseEntity<FoodItem> updateFoodItem(
+            @PathVariable Long id,
+            @RequestBody FoodItem foodItemDetails) {            // ← aggiunto @RequestBody
+
+        return foodItemRepository.findById(id)
+                .map(foodItem -> {
+                    foodItem.setName(foodItemDetails.getName());
+                    foodItem.setPrice(foodItemDetails.getPrice());
+                    return ResponseEntity.ok(foodItemRepository.save(foodItem));
+                })
+                .orElse(ResponseEntity.notFound().build());     // ← evita save(null)
     }
 
-    //Endpoint per eliminare un articolo alimentare
+    // DELETE /api/foods/{id} — elimina un articolo
     @DeleteMapping("/{id}")
-    public void deleteFoodItem(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteFoodItem(@PathVariable Long id) {
+        if (!foodItemRepository.existsById(id)) {
+            return ResponseEntity.notFound().build();           // ← 404 se non esiste
+        }
         foodItemRepository.deleteById(id);
+        return ResponseEntity.noContent().build();              // ← 204 No Content
     }
-
 }
