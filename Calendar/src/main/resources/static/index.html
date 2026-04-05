@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CalendarApp</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <!-- AUTH SCREEN -->
+    <div id="auth-screen" class="auth-screen">
+        <div class="auth-card">
+            <div class="auth-logo">📅 CalendarApp</div>
+
+            <div class="auth-tabs">
+                <button class="auth-tab active" id="tab-login" onclick="switchTab('login')">
+                    🔑 Accedi
+                </button>
+                <button class="auth-tab" id="tab-register" onclick="switchTab('register')">
+                    ✨ Registrati
+                </button>
+            </div>
+
+            <!-- Login Form -->
+            <div id="form-login">
+                <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" id="login-username" placeholder="Il tuo username" />
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="login-password" placeholder="La tua password" />
+                </div>
+                <div id="login-error" class="error-msg hidden"></div>
+                <button class="btn-primary" style="margin-top: 12px;" onclick="handleLogin()">Accedi</button>
+            </div>
+
+            <!-- Register Form -->
+            <div id="form-register" class="hidden">
+                <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" id="reg-username" placeholder="Scegli un username" />
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="reg-email" placeholder="La tua email" />
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="reg-password" placeholder="Min. 6 caratteri" />
+                </div>
+                <div id="reg-error" class="error-msg hidden"></div>
+                <button class="btn-primary" style="margin-top: 12px;" onclick="handleRegister()">Registrati</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- APP SCREEN -->
+    <div id="app-screen" class="hidden">
+
+        <!-- MOBILE HEADER -->
+        <header class="mobile-header">
+            <button class="hamburger" id="hamburger" onclick="toggleSidebar()">☰</button>
+            <span class="mobile-title">CalendarApp</span>
+            <button class="btn-icon" onclick="logout()">⏻</button>
+        </header>
+
+        <!-- SIDEBAR OVERLAY (mobile) -->
+        <div class="sidebar-overlay hidden" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+        <div class="app-layout">
+
+            <!-- SIDEBAR -->
+            <aside class="sidebar" id="sidebar">
+                <div class="sidebar-logo">📅 CalendarApp</div>
+
+                <button class="btn-add" onclick="openEventModal()">+ Nuovo evento</button>
+
+                <nav class="sidebar-nav">
+                    <button class="nav-btn active">📅 Calendario</button>
+                    <button class="nav-btn" onclick="logout()">⏻ Esci</button>
+                </nav>
+
+                <div class="mini-calendar">
+                    <div class="mini-cal-header">
+                        <button class="mini-nav" onclick="miniPrev()">‹</button>
+                        <span id="mini-month-label"></span>
+                        <button class="mini-nav" onclick="miniNext()">›</button>
+                    </div>
+                    <div class="mini-cal-grid">
+                        <div class="mini-day-label">L</div>
+                        <div class="mini-day-label">M</div>
+                        <div class="mini-day-label">M</div>
+                        <div class="mini-day-label">G</div>
+                        <div class="mini-day-label">V</div>
+                        <div class="mini-day-label">S</div>
+                        <div class="mini-day-label">D</div>
+                    </div>
+                    <div id="mini-cal-days" class="mini-cal-grid"></div>
+                </div>
+            </aside>
+
+            <!-- MAIN CONTENT -->
+            <main class="main-content">
+                <div class="main-header">
+                    <div class="header-left">
+                        <div class="nav-arrows">
+                            <button class="arr-btn" onclick="prevMonth()">‹</button>
+                            <button class="arr-btn" onclick="nextMonth()">›</button>
+                        </div>
+                        <h1 class="month-title" id="month-title"></h1>
+                        <button class="btn-today" onclick="goToday()">Oggi</button>
+                    </div>
+                    <div class="view-toggle">
+                        <button class="vt-btn active">Mese</button>
+                    </div>
+                </div>
+
+                <!-- CALENDAR GRID -->
+                <div class="calendar-grid" id="calendar-grid">
+                    <div class="day-label">Lun</div>
+                    <div class="day-label">Mar</div>
+                    <div class="day-label">Mer</div>
+                    <div class="day-label">Gio</div>
+                    <div class="day-label">Ven</div>
+                    <div class="day-label">Sab</div>
+                    <div class="day-label">Dom</div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- MODAL NUOVO EVENTO -->
+    <div class="modal-overlay hidden" id="event-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 id="modal-title">Nuovo evento</h2>
+                <button class="modal-close" onclick="closeEventModal()">✕</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="event-id" />
+                <div class="form-group">
+                    <label>Titolo *</label>
+                    <input type="text" id="event-title" placeholder="Titolo evento" />
+                </div>
+                <div class="form-group">
+                    <label>Descrizione</label>
+                    <textarea id="event-desc" placeholder="Descrizione (opzionale)" rows="3"></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Inizio *</label>
+                        <input type="datetime-local" id="event-start" />
+                    </div>
+                    <div class="form-group">
+                        <label>Fine</label>
+                        <input type="datetime-local" id="event-end" />
+                    </div>
+                </div>
+                <div class="form-row" style="align-items: center;">
+                    <div class="form-group">
+                        <label>Colore</label>
+                        <div class="color-picker">
+                            <div class="color-dot active" style="background:#3b82f6" data-color="#3b82f6" onclick="selectColor(this)"></div>
+                            <div class="color-dot" style="background:#22c55e" data-color="#22c55e" onclick="selectColor(this)"></div>
+                            <div class="color-dot" style="background:#a855f7" data-color="#a855f7" onclick="selectColor(this)"></div>
+                            <div class="color-dot" style="background:#f59e0b" data-color="#f59e0b" onclick="selectColor(this)"></div>
+                            <div class="color-dot" style="background:#ef4444" data-color="#ef4444" onclick="selectColor(this)"></div>
+                            <div class="color-dot" style="background:#06b6d4" data-color="#06b6d4" onclick="selectColor(this)"></div>
+                        </div>
+                    </div>
+                    <div class="allday-row" style="border:none; padding: 0; margin-top: 20px; gap: 10px;">
+                        <span class="allday-label" style="font-size:15px; font-weight:500; color: var(--text-primary);">Tutto il giorno</span>
+                        <input type="checkbox" id="event-allday" class="allday-check" onchange="toggleAllDay(this)" />
+                    </div>
+                </div>
+                <div id="modal-error" class="error-msg hidden"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-danger hidden" id="btn-delete" onclick="deleteEvent()">Elimina</button>
+                <button class="btn-secondary" onclick="closeEventModal()">Annulla</button>
+                <button class="btn-primary" onclick="saveEvent()">Salva</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/calendar.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>

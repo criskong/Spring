@@ -1,0 +1,16 @@
+### Secrets ###
+application-local.properties
+
+### Build ###
+target/
+
+### IDE ###
+.idea/
+*.iml
+.vscode/
+.classpath
+.project
+.settings/
+
+### Maven wrapper jar ###
+.mvn/wrapper/maven-wrapper.jar
