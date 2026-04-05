@@ -2,13 +2,18 @@
 
 Web application per la gestione di impegni personali, sviluppata con **Spring Boot** e **MySQL**.
 
+🌐 **App live**: [https://calendar-ae4i.onrender.com](https://calendar-ae4i.onrender.com)
+
+> ℹ️ Il servizio è hostato su piano gratuito — al primo accesso dopo un periodo di inattività potrebbe impiegare 1-2 minuti per avviarsi.
+
 ## 🚀 Tech Stack
 
 - **Backend**: Java 17, Spring Boot 4, Spring Security, JWT
-- **Database**: MySQL 8
+- **Database**: MySQL 8 (Clever Cloud)
 - **Frontend**: HTML5, CSS3, JavaScript (vanilla)
 - **ORM**: Hibernate / Spring Data JPA
 - **Build**: Maven
+- **Deploy**: Render (backend + frontend) + Clever Cloud (database)
 
 ## ✨ Funzionalità
 
@@ -30,6 +35,15 @@ src/main/java/Calendar/demo/
 ├── model/           ← Entity JPA (User, Event)
 ├── repository/      ← Spring Data JPA
 └── service/         ← Business logic
+
+src/main/resources/static/
+├── index.html
+├── css/
+│   └── style.css
+└── js/
+    ├── api.js       ← chiamate REST API
+    ├── calendar.js  ← logica calendario
+    └── app.js       ← gestione UI
 ```
 
 ## ⚙️ Installazione locale
@@ -87,6 +101,14 @@ http://localhost:8080
 - Autenticazione **stateless** tramite JWT
 - Ogni richiesta autenticata viene validata dal `JwtAuthFilter`
 - Ogni utente accede **solo ai propri dati**
+- Credenziali mai esposte nel codice — gestite tramite variabili d'ambiente
+
+## ☁️ Deploy
+
+| Componente | Servizio | Piano |
+|------------|----------|-------|
+| Backend + Frontend | Render | Free |
+| Database MySQL | Clever Cloud | DEV (Free) |
 
 ## 👨‍💻 Autore
 
