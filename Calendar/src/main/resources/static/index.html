@@ -78,7 +78,8 @@
                 <button class="btn-add" onclick="openEventModal()">+ Nuovo evento</button>
 
                 <nav class="sidebar-nav">
-                    <button class="nav-btn active">📅 Calendario</button>
+                    <button class="nav-btn active" id="btn-calendar" onclick="showCalendar()">📅 Calendario</button>
+                    <button class="nav-btn" id="btn-list" onclick="showEventList()">📋 I miei eventi</button>
                     <button class="nav-btn" onclick="logout()">⏻ Esci</button>
                 </nav>
 
@@ -127,11 +128,21 @@
                     <div class="day-label">Sab</div>
                     <div class="day-label">Dom</div>
                 </div>
+
+                <!-- LISTA EVENTI -->
+                <div id="event-list-view" class="hidden">
+                    <div class="event-list-header">
+                        <h2>I miei eventi</h2>
+                        <button class="btn-secondary" onclick="showCalendar()">← Torna al calendario</button>
+                    </div>
+                    <div id="event-list-container"></div>
+                </div>
+
             </main>
         </div>
     </div>
 
-    <!-- MODAL NUOVO EVENTO -->
+    <!-- MODAL NUOVO/MODIFICA EVENTO -->
     <div class="modal-overlay hidden" id="event-modal">
         <div class="modal">
             <div class="modal-header">
@@ -181,6 +192,20 @@
                 <button class="btn-danger hidden" id="btn-delete" onclick="deleteEvent()">Elimina</button>
                 <button class="btn-secondary" onclick="closeEventModal()">Annulla</button>
                 <button class="btn-primary" onclick="saveEvent()">Salva</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL EVENTI DEL GIORNO -->
+    <div class="modal-overlay hidden" id="day-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 id="day-modal-title">Eventi del giorno</h2>
+                <button class="modal-close" onclick="closeDayModal()">✕</button>
+            </div>
+            <div class="modal-body" id="day-modal-body"></div>
+            <div class="modal-footer">
+                <button class="btn-primary" onclick="closeDayModal(); openEventModal(currentDaySelected)">+ Nuovo evento</button>
             </div>
         </div>
     </div>

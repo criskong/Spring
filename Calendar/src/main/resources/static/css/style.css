@@ -668,7 +668,9 @@ body {
 
 @media (max-width: 480px) {
     .day-label { font-size: 10px; padding: 6px 2px; }
+    
     .event-chip { display: none; }
+    
     .day-cell.has-events::after {
         content: '';
         display: block;
@@ -787,5 +789,122 @@ body {
 
 .allday-check:hover {
     border-color: var(--accent);
+}
+
+/* ─── LISTA EVENTI ─── */
+
+.event-list-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.event-list-header h2 {
+    font-size: 20px;
+    font-weight: 600;
+}
+
+.event-list-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.event-list-item {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    cursor: pointer;
+    transition: border-color 0.15s;
+    border-left: 4px solid;
+}
+
+.event-list-item:hover {
+    border-color: var(--accent);
+}
+
+.event-list-date {
+    text-align: center;
+    min-width: 48px;
+}
+
+.event-list-date .day {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1;
+}
+
+.event-list-date .month {
+    font-size: 11px;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.event-list-info {
+    flex: 1;
+}
+
+.event-list-info .title {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+}
+
+.event-list-info .time {
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.event-list-empty {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-secondary);
+    font-size: 15px;
+}
+
+/* ─── DAY MODAL EVENTI ─── */
+
+.day-event-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    border-radius: var(--radius-md);
+    background: var(--bg-tertiary);
+    cursor: pointer;
+    transition: opacity 0.15s;
+    border-left: 4px solid;
+    margin-bottom: 8px;
+}
+
+.day-event-item:hover { opacity: 0.8; }
+
+.day-event-info .title {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.day-event-info .time {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-top: 2px;
+}
+
+.day-empty {
+    text-align: center;
+    padding: 20px;
+    color: var(--text-secondary);
+    font-size: 14px;
 }
 }

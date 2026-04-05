@@ -194,10 +194,15 @@ function createMiniDay(date, otherMonth) {
     if (isSameDay(date, today)) div.classList.add('today');
     div.textContent = date.getDate();
 
-    div.addEventListener('click', () => {
-        currentDate = new Date(date);
-        renderCalendar();
-    });
+cell.addEventListener('click', () => {
+    const dayEvents = getEventsForDay(date);
+    // Su mobile mostra il day modal se ci sono eventi
+    if (window.innerWidth <= 480 && dayEvents.length > 0) {
+        openDayModal(date, dayEvents);
+    } else {
+        openEventModal(date);
+    }
+});
 
     return div;
 }

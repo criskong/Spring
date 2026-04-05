@@ -279,4 +279,109 @@ async function deleteEvent() {
     } catch (e) {
         showError('modal-error', e.message);
     }
+
+    // ─── VISTA LISTA ───
+
+let currentDaySelected = null;
+
+function showEventList() {
+    document.getElementById('calendar-grid').classList.add('hidden');
+    document.getElementById('event-list-view').classList.remove('hidden');
+    document.getElementById('btn-list').classList.add('active');
+    document.querySelector('.nav-btn.active:not(#btn-list)')?.classList.remove('active');
+
+    renderEventList();
+
+    // Chiudi sidebar su mobile
+    const sidebar = document.getElementById('sidebar');
+    if (sidebar.classList.contains('open')) toggleSidebar();
+}
+
+function showCalendar() {
+    document.getElementById('calendar-grid').classList.remove('hidden');
+    document.getElementById('event-list-view').classList.add('hidden');
+    document.getElementById('btn-list').classList.remove('active');
+}
+
+function renderEventList() {
+    const container = document.getElementById('event-list-container');
+    container.innerHTML = '';
+
+    if (allEvents.length === 0) {
+        container.innerHTML = `<div class="event-list-empty">Nessun evento programmato.<br>Clicca su un giorno per aggiungerne uno!</div>`;
+        return;
+    }
+
+    // Ordina per data
+    const sorted = [...allEvents].sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
+
+    sorted.forEach(ev => {
+        const start = new Date(ev.startTime);
+        const item = document.createElement('div');
+        item.className = 'event-list-item';
+        item.style.borderLeftColor = ev.color || '#3b82f6';
+
+        const day = start.getDate();
+        const month = start.toLocaleDateString('it-IT', { month: 'short' });
+        const time = ev.allDay ? 'Tutto il giorno' : start.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+
+        item.innerHTML = `
+            <div class="event-list-date">
+                <div class="day">${day}</div>
+                <div class="month">${month}</div>
+            </div>
+            <div class="event-list-info">
+                <div class="title">${ev.title}</div>
+                <div class="time">${time}${ev.description ? ' — ' + ev.description : ''}</div>
+            </div>
+        `;
+
+        item.addEventListener('click', () => openEventModal(start, ev));
+        container.appendChild(item);
+    });
+}
+
+// ─── DAY MODAL ───
+
+function openDayModal(date, events) {
+    currentDaySelected = date;
+    const title = date.toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'long' });
+    document.getElementById('day-modal-title').textContent = title.charAt(0).toUpperCase() + title.slice(1);
+
+    const body = document.getElementById('day-modal-body');
+    body.innerHTML = '';
+
+    if (events.length === 0) {
+        body.innerHTML = `<div class="day-empty">Nessun evento per questo giorno.</div>`;
+    } else {
+        events.forEach(ev => {
+            const item = document.createElement('div');
+            item.className = 'day-event-item';
+            item.style.borderLeftColor = ev.color || '#3b82f6';
+
+            const start = new Date(ev.startTime);
+            const time = ev.allDay ? 'Tutto il giorno' : start.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+
+            item.innerHTML = `
+                <div class="day-event-info">
+                    <div class="title">${ev.title}</div>
+                    <div class="time">${time}</div>
+                </div>
+            `;
+
+            item.addEventListener('click', () => {
+                closeDayModal();
+                openEventModal(date, ev);
+            });
+
+            body.appendChild(item);
+        });
+    }
+
+    document.getElementById('day-modal').classList.remove('hidden');
+}
+
+function closeDayModal() {
+    document.getElementById('day-modal').classList.add('hidden');
+}
 }
