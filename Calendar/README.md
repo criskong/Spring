@@ -13,6 +13,7 @@ Web application per la gestione di impegni personali, sviluppata con **Spring Bo
 - **Frontend**: HTML5, CSS3, JavaScript (vanilla)
 - **ORM**: Hibernate / Spring Data JPA
 - **Build**: Maven
+- **Test**: JUnit 5, Mockito, MockMvc, H2
 - **Deploy**: Render (backend + frontend) + Clever Cloud (database)
 
 ## ✨ Funzionalità
@@ -28,10 +29,11 @@ Web application per la gestione di impegni personali, sviluppata con **Spring Bo
 ## 🏗️ Architettura
 
 ```
-src/main/java/Calendar/demo/
+src/main/java/calendar/demo/
 ├── config/          ← Spring Security + JWT Filter
 ├── controller/      ← REST API endpoints
 ├── dto/             ← Data Transfer Objects
+├── exception/       ← Eccezioni custom + gestione errori globale
 ├── model/           ← Entity JPA (User, Event)
 ├── repository/      ← Spring Data JPA
 └── service/         ← Business logic
@@ -84,6 +86,26 @@ jwt.expiration=86400000
 http://localhost:8080
 ```
 
+## 🧪 Test
+
+I test usano un database **H2 in memoria**, quindi non serve MySQL per eseguirli:
+
+```bash
+./mvnw test
+```
+
+```
+src/test/java/calendar/demo/
+├── config/       ← JwtService (unit test)
+├── service/      ← UserService, EventService (unit test con Mockito)
+├── repository/   ← query JPA (@DataJpaTest su H2)
+└── controller/   ← API complete con MockMvc (@SpringBootTest)
+```
+
+- **Unit test**: testano la logica dei service in isolamento, sostituendo repository e dipendenze con dei mock
+- **Test del repository**: verificano che le query restituiscano solo gli eventi giusti
+- **Test di integrazione**: simulano le chiamate HTTP e controllano status code, risposte JSON e sicurezza (token mancante, eventi di altri utenti...)
+
 ## 🔌 API Endpoints
 
 | Metodo | Endpoint | Descrizione | Auth |
@@ -91,9 +113,26 @@ http://localhost:8080
 | POST | `/api/auth/register` | Registrazione | No |
 | POST | `/api/auth/login` | Login → JWT token | No |
 | GET | `/api/events` | Lista eventi utente | Sì |
+| GET | `/api/events/range?start=&end=` | Eventi in un intervallo di date | Sì |
 | POST | `/api/events` | Crea evento | Sì |
 | PUT | `/api/events/{id}` | Modifica evento | Sì |
 | DELETE | `/api/events/{id}` | Elimina evento | Sì |
+
+### Errori
+
+In caso di errore le API rispondono con lo status HTTP corretto e un JSON del tipo:
+
+```json
+{ "error": "Evento non trovato" }
+```
+
+| Status | Quando |
+|--------|--------|
+| 400 | Dati non validi (es. titolo mancante, data fine prima dell'inizio) |
+| 401 | Token mancante/scaduto o credenziali errate |
+| 403 | Tentativo di modificare eventi di un altro utente |
+| 404 | Evento non trovato |
+| 409 | Username o email già registrati |
 
 ## 🔐 Sicurezza
 
