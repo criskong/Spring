@@ -36,6 +36,27 @@ function publicHeaders() {
     return { 'Content-Type': 'application/json' };
 }
 
+// ─── ERRORI ───
+
+// Il backend risponde con { "error": "messaggio" }: se c'è lo uso, altrimenti il messaggio di default
+async function getErrorMessage(res, fallback) {
+    try {
+        const data = await res.json();
+        return data.error || fallback;
+    } catch {
+        return fallback;
+    }
+}
+
+// Se il token è scaduto o non valido torna alla schermata di login
+function checkSession(res) {
+    if (res.status === 401) {
+        removeToken();
+        showAuth();
+        throw new Error('Sessione scaduta, effettua di nuovo il login');
+    }
+}
+
 // ─── AUTH ───
 
 async function apiRegister(username, email, password) {
@@ -44,11 +65,8 @@ async function apiRegister(username, email, password) {
         headers: publicHeaders(),
         body: JSON.stringify({ username, email, password })
     });
-    if (!res.ok) {
-        const text = await res.text();
-        throw new Error(text || 'Errore registrazione');
-    }
-    return res.text();
+    if (!res.ok) throw new Error(await getErrorMessage(res, 'Errore registrazione'));
+    return res.json();
 }
 
 async function apiLogin(username, password) {
@@ -57,9 +75,7 @@ async function apiLogin(username, password) {
         headers: publicHeaders(),
         body: JSON.stringify({ username, password })
     });
-    if (!res.ok) {
-        throw new Error('Credenziali non valide');
-    }
+    if (!res.ok) throw new Error(await getErrorMessage(res, 'Credenziali non valide'));
     const data = await res.json();
     setToken(data.token);
     setUsername(data.username);
@@ -73,12 +89,8 @@ async function apiGetEvents() {
         method: 'GET',
         headers: authHeaders()
     });
-    if (res.status === 401) {
-        removeToken();
-        showAuth();
-        throw new Error('Sessione scaduta');
-    }
-    if (!res.ok) throw new Error('Errore caricamento eventi');
+    checkSession(res);
+    if (!res.ok) throw new Error(await getErrorMessage(res, 'Errore caricamento eventi'));
     return res.json();
 }
 
@@ -88,7 +100,8 @@ async function apiCreateEvent(eventData) {
         headers: authHeaders(),
         body: JSON.stringify(eventData)
     });
-    if (!res.ok) throw new Error('Errore creazione evento');
+    checkSession(res);
+    if (!res.ok) throw new Error(await getErrorMessage(res, 'Errore creazione evento'));
     return res.json();
 }
 
@@ -98,7 +111,8 @@ async function apiUpdateEvent(id, eventData) {
         headers: authHeaders(),
         body: JSON.stringify(eventData)
     });
-    if (!res.ok) throw new Error('Errore modifica evento');
+    checkSession(res);
+    if (!res.ok) throw new Error(await getErrorMessage(res, 'Errore modifica evento'));
     return res.json();
 }
 
@@ -107,6 +121,7 @@ async function apiDeleteEvent(id) {
         method: 'DELETE',
         headers: authHeaders()
     });
-    if (!res.ok) throw new Error('Errore eliminazione evento');
-    return res.text();
+    checkSession(res);
+    if (!res.ok) throw new Error(await getErrorMessage(res, 'Errore eliminazione evento'));
+    return res.json();
 }

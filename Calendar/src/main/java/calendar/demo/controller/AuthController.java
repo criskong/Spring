@@ -8,6 +8,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
@@ -18,7 +20,7 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<?> register(@Valid @RequestBody RegisterDTO dto) {
         userService.register(dto);
-        return ResponseEntity.ok("Registrazione avvenuta con successo");
+        return ResponseEntity.ok(Map.of("message", "Registrazione avvenuta con successo"));
     }
 
     @PostMapping("/login")

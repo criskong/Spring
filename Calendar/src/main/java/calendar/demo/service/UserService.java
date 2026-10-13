@@ -3,6 +3,8 @@ package calendar.demo.service;
 import calendar.demo.config.JwtService;
 import calendar.demo.dto.LoginDTO;
 import calendar.demo.dto.RegisterDTO;
+import calendar.demo.exception.AlreadyExistsException;
+import calendar.demo.exception.InvalidCredentialsException;
 import calendar.demo.model.User;
 import calendar.demo.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -21,9 +23,9 @@ public class UserService {
 
     public User register(RegisterDTO dto) {
         if (userRepository.existsByUsername(dto.getUsername()))
-            throw new RuntimeException("Username già in uso");
+            throw new AlreadyExistsException("Username già in uso");
         if (userRepository.existsByEmail(dto.getEmail()))
-            throw new RuntimeException("Email già in uso");
+            throw new AlreadyExistsException("Email già in uso");
 
         User user = User.builder()
                 .username(dto.getUsername())
@@ -35,11 +37,13 @@ public class UserService {
     }
 
     public Map<String, String> login(LoginDTO dto) {
+        // Stesso messaggio sia per utente inesistente che per password errata,
+        // così non si rivela quali username sono registrati
         User user = userRepository.findByUsername(dto.getUsername())
-                .orElseThrow(() -> new RuntimeException("Utente non trovato"));
+                .orElseThrow(() -> new InvalidCredentialsException("Username o password non validi"));
 
         if (!passwordEncoder.matches(dto.getPassword(), user.getPassword()))
-            throw new RuntimeException("Password errata");
+            throw new InvalidCredentialsException("Username o password non validi");
 
         String token = jwtService.generateToken(user.getUsername());
         return Map.of("token", token, "username", user.getUsername());
