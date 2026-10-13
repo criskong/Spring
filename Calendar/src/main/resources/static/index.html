@@ -131,13 +131,17 @@
                     <div class="day-label">Dom</div>
                 </div>
 
-                <!-- VISTA GIORNO -->
-                <div id="day-view" class="day-view hidden">
+                <!-- VISTA SETTIMANA / GIORNO: griglia oraria riempita da renderTimeView() -->
+                <div id="time-view" class="time-view hidden">
                     <button class="btn-add" onclick="openEventModal(currentDate)">+ Nuovo evento</button>
-                    <!-- Eventi "tutto il giorno" -->
-                    <div id="day-allday" class="day-allday"></div>
-                    <!-- Griglia con le ore: viene riempita da renderDayView() -->
-                    <div id="day-timeline" class="day-timeline"></div>
+                    <div class="time-box">
+                        <!-- Giorni della settimana (es. "mar 13") -->
+                        <div id="time-header" class="time-header"></div>
+                        <!-- Eventi "tutto il giorno" -->
+                        <div id="time-allday" class="time-allday"></div>
+                        <!-- Ore e colonne dei giorni -->
+                        <div id="time-grid" class="time-grid"></div>
+                    </div>
                 </div>
 
                 <!-- LISTA EVENTI -->

@@ -296,7 +296,7 @@ let listFilter = 'all'; // 'all', 'month', 'week' oppure 'day'
 
 function showEventList() {
     document.getElementById('calendar-grid').classList.add('hidden');
-    document.getElementById('day-view').classList.add('hidden');
+    document.getElementById('time-view').classList.add('hidden');
     document.getElementById('main-header').classList.add('hidden');
     document.getElementById('event-list-view').classList.remove('hidden');
     document.getElementById('btn-list').classList.add('active');

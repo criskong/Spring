@@ -63,22 +63,26 @@ function darkenColor(hex, amount = 30) {
 // Disegna la vista attiva (mese, settimana o giorno)
 function renderCalendar() {
     const grid = document.getElementById('calendar-grid');
-    const dayView = document.getElementById('day-view');
+    const timeView = document.getElementById('time-view');
 
     // Rimuovi solo le celle (non le label dei giorni)
     grid.querySelectorAll('.day-cell').forEach(c => c.remove());
 
-    if (currentView === 'day') {
-        grid.classList.add('hidden');
-        dayView.classList.remove('hidden');
-        renderDayView();
-    } else {
+    if (currentView === 'month') {
         grid.classList.remove('hidden');
-        dayView.classList.add('hidden');
-        grid.classList.toggle('week', currentView === 'week');
+        timeView.classList.add('hidden');
+        renderMonthGrid(grid);
+    } else {
+        // Settimana e giorno usano la stessa griglia oraria: cambia solo il numero di giorni
+        grid.classList.add('hidden');
+        timeView.classList.remove('hidden');
 
-        if (currentView === 'week') renderWeekGrid(grid);
-        else renderMonthGrid(grid);
+        if (currentView === 'week') {
+            const start = getWeekStart(currentDate);
+            renderTimeView([0, 1, 2, 3, 4, 5, 6].map(i => addDays(start, i)));
+        } else {
+            renderTimeView([currentDate]);
+        }
     }
 
     renderTitle();
@@ -138,89 +142,142 @@ function renderMonthGrid(grid) {
     }
 }
 
-// Vista settimana: una sola riga con i 7 giorni, da lunedì a domenica
-function renderWeekGrid(grid) {
-    const start = getWeekStart(currentDate);
-    for (let i = 0; i < 7; i++) {
-        grid.appendChild(createDayCell(addDays(start, i), false));
-    }
-}
-
-// ─── VISTA GIORNO ───
+// ─── VISTA SETTIMANA E GIORNO (GRIGLIA ORARIA) ───
 
 const HOUR_HEIGHT = 60; // altezza in pixel di un'ora nella griglia
 
-// Vista giorno: griglia con le 24 ore e gli eventi posizionati in base all'orario
-function renderDayView() {
-    const allDayBox = document.getElementById('day-allday');
-    const timeline = document.getElementById('day-timeline');
-    allDayBox.innerHTML = '';
-    timeline.innerHTML = '';
+// Disegna la griglia oraria con una colonna per ogni giorno (7 per la settimana, 1 per il giorno)
+function renderTimeView(days) {
+    const header = document.getElementById('time-header');
+    const allDayRow = document.getElementById('time-allday');
+    const timeGrid = document.getElementById('time-grid');
+    header.innerHTML = '';
+    allDayRow.innerHTML = '';
+    timeGrid.innerHTML = '';
 
-    const events = getEventsForDay(currentDate);
+    // Header e riga "tutto il giorno" sono griglie CSS: 60px per le ore + una colonna per giorno
+    const columnsTemplate = `60px repeat(${days.length}, 1fr)`;
+    header.style.gridTemplateColumns = columnsTemplate;
+    allDayRow.style.gridTemplateColumns = columnsTemplate;
 
-    // Eventi "tutto il giorno": in una fascia sopra la griglia
-    const allDayEvents = events.filter(ev => ev.allDay);
-    allDayEvents.forEach(ev => allDayBox.appendChild(createDayEventBlock(ev)));
-    allDayBox.classList.toggle('hidden', allDayEvents.length === 0);
+    // Nella vista giorno la data è già nel titolo: l'header serve solo per la settimana
+    header.classList.toggle('hidden', days.length === 1);
 
-    // Contenitore alto 24 ore, dentro cui posiziono righe ed eventi
+    header.appendChild(document.createElement('div')); // spazio sopra la colonna delle ore
+    allDayRow.innerHTML = `<div class="allday-title">Tutto il giorno</div>`;
+    let hasAllDay = false;
+
+    days.forEach(day => {
+        // Intestazione del giorno (es. "mar 13"): cliccandola apri la vista giorno
+        const dayHeader = document.createElement('div');
+        dayHeader.className = 'time-day-header';
+        if (isSameDay(day, new Date())) dayHeader.classList.add('today');
+        dayHeader.innerHTML = `
+            <span class="weekday">${day.toLocaleDateString('it-IT', { weekday: 'short' })}</span>
+            <span class="day-number">${day.getDate()}</span>
+        `;
+        dayHeader.addEventListener('click', () => {
+            currentDate = new Date(day);
+            setView('day');
+        });
+        header.appendChild(dayHeader);
+
+        // Eventi "tutto il giorno" di questa giornata
+        const cell = document.createElement('div');
+        cell.className = 'allday-cell';
+        getEventsForDay(day).filter(ev => ev.allDay).forEach(ev => {
+            cell.appendChild(createTimeEventBlock(ev));
+            hasAllDay = true;
+        });
+        allDayRow.appendChild(cell);
+    });
+
+    allDayRow.classList.toggle('hidden', !hasAllDay);
+
+    // Contenitore alto 24 ore: righe delle ore + colonne dei giorni
     const inner = document.createElement('div');
     inner.className = 'timeline-inner';
     inner.style.height = `${24 * HOUR_HEIGHT}px`;
-    timeline.appendChild(inner);
+    timeGrid.appendChild(inner);
 
-    // Una riga per ogni ora: cliccandola si crea un evento a quell'ora
     for (let hour = 0; hour < 24; hour++) {
         const row = document.createElement('div');
         row.className = 'hour-row';
         row.style.top = `${hour * HOUR_HEIGHT}px`;
         row.style.height = `${HOUR_HEIGHT}px`;
         row.innerHTML = `<span class="hour-label">${String(hour).padStart(2, '0')}:00</span>`;
-        row.addEventListener('click', () => openEventModal(currentDate, null, hour));
         inner.appendChild(row);
     }
 
-    // Eventi con orario
-    const timedEvents = events
+    let firstHour = 24;
+    days.forEach((day, i) => {
+        const column = createTimeColumn(day);
+        column.style.left = `calc(60px + (100% - 60px) * ${i / days.length})`;
+        column.style.width = `calc((100% - 60px) / ${days.length})`;
+        inner.appendChild(column);
+
+        getEventsForDay(day).filter(ev => !ev.allDay).forEach(ev => {
+            firstHour = Math.min(firstHour, new Date(ev.startTime).getHours());
+        });
+    });
+
+    // Scorri fino al primo evento (o alle 8:00 se non ce ne sono).
+    // requestAnimationFrame aspetta che il browser abbia disegnato la griglia,
+    // altrimenti lo scroll non ha effetto
+    const scrollHour = firstHour === 24 ? 8 : Math.max(0, firstHour - 1);
+    requestAnimationFrame(() => {
+        timeGrid.scrollTop = scrollHour * HOUR_HEIGHT;
+    });
+}
+
+// Colonna di un giorno nella griglia oraria, con i suoi eventi
+function createTimeColumn(day) {
+    const column = document.createElement('div');
+    column.className = 'time-col';
+    if (isSameDay(day, new Date())) column.classList.add('today');
+
+    // Click su uno spazio vuoto = nuovo evento all'ora cliccata
+    column.addEventListener('click', (e) => {
+        const hour = Math.floor(e.offsetY / HOUR_HEIGHT);
+        openEventModal(day, null, hour);
+    });
+
+    const events = getEventsForDay(day)
         .filter(ev => !ev.allDay)
         .sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
 
-    const columns = assignColumns(timedEvents);
+    const columns = assignColumns(events);
 
-    timedEvents.forEach((ev, i) => {
+    events.forEach((ev, i) => {
         const { startMin, endMin } = getEventMinutes(ev);
-        const block = createDayEventBlock(ev);
 
-        // Quante colonne servono per questo evento: guardo solo quelli che si sovrappongono a lui
-        let totalColumns = columns[i] + 1;
-        timedEvents.forEach((other, j) => {
+        // Quante sotto-colonne servono: guardo solo gli eventi che si sovrappongono a questo
+        let total = columns[i] + 1;
+        events.forEach((other, j) => {
             const o = getEventMinutes(other);
-            if (o.startMin < endMin && o.endMin > startMin) totalColumns = Math.max(totalColumns, columns[j] + 1);
+            if (o.startMin < endMin && o.endMin > startMin) total = Math.max(total, columns[j] + 1);
         });
 
+        const block = createTimeEventBlock(ev);
         block.style.top = `${startMin / 60 * HOUR_HEIGHT}px`;
         // Almeno mezz'ora di altezza, così anche gli eventi brevi si leggono
         block.style.height = `${Math.max(endMin - startMin, 30) / 60 * HOUR_HEIGHT}px`;
-        // Eventi sovrapposti affiancati: ognuno nella sua colonna
-        block.style.left = `calc(60px + (100% - 64px) * ${columns[i] / totalColumns})`;
-        block.style.width = `calc((100% - 64px) / ${totalColumns} - 4px)`;
-
-        inner.appendChild(block);
+        // Eventi sovrapposti affiancati dentro la colonna del giorno
+        block.style.left = `${columns[i] / total * 100}%`;
+        block.style.width = `calc(${100 / total}% - 4px)`;
+        column.appendChild(block);
     });
 
-    // Linea rossa sull'ora attuale, solo se sto guardando oggi
+    // Linea rossa sull'ora attuale, solo nella colonna di oggi
     const now = new Date();
-    if (isSameDay(currentDate, now)) {
+    if (isSameDay(day, now)) {
         const line = document.createElement('div');
         line.className = 'now-line';
         line.style.top = `${(now.getHours() * 60 + now.getMinutes()) / 60 * HOUR_HEIGHT}px`;
-        inner.appendChild(line);
+        column.appendChild(line);
     }
 
-    // Scorri fino al primo evento (o alle 8:00 se non ce ne sono)
-    const firstHour = timedEvents.length > 0 ? new Date(timedEvents[0].startTime).getHours() : 8;
-    timeline.scrollTop = Math.max(0, firstHour - 1) * HOUR_HEIGHT;
+    return column;
 }
 
 // Minuti dall'inizio della giornata per inizio e fine dell'evento (es. 09:30 = 570)
@@ -249,8 +306,8 @@ function assignColumns(events) {
     });
 }
 
-// Blocco colorato di un evento nella vista giorno
-function createDayEventBlock(ev) {
+// Blocco colorato di un evento nella griglia oraria
+function createTimeEventBlock(ev) {
     const color = ev.color || '#3b82f6';
     const block = document.createElement('div');
     block.className = 'day-event';
@@ -264,7 +321,7 @@ function createDayEventBlock(ev) {
     `;
 
     block.addEventListener('click', (e) => {
-        e.stopPropagation(); // non far partire il click sulla riga dell'ora
+        e.stopPropagation(); // non far partire il click sulla colonna (nuovo evento)
         openEventModal(new Date(ev.startTime), ev);
     });
     return block;

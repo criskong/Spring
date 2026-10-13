@@ -27,7 +27,7 @@ test.describe.serial("gestione eventi", () => {
   test("crea un evento per oggi dalla vista giorno", async ({ page }) => {
     // La vista giorno parte da oggi: il modal è già impostato su oggi 09:00 - 10:00
     await page.getByRole("button", { name: "Giorno", exact: true }).click();
-    await page.locator("#day-view").getByRole("button", { name: "+ Nuovo evento" }).click();
+    await page.locator("#time-view").getByRole("button", { name: "+ Nuovo evento" }).click();
     await expect(page.locator("#modal-title")).toHaveText("Nuovo evento");
 
     await page.locator("#event-title").fill(title);
@@ -35,7 +35,7 @@ test.describe.serial("gestione eventi", () => {
     await page.getByRole("button", { name: "Salva", exact: true }).click();
 
     await expect(page.locator("#event-modal")).toBeHidden();
-    await expect(page.locator("#day-timeline .day-event", { hasText: title })).toBeVisible();
+    await expect(page.locator("#time-grid .day-event", { hasText: title })).toBeVisible();
 
     // Tornando alla vista mese l'evento compare nella cella di oggi
     await page.getByRole("button", { name: "Mese" }).click();
@@ -44,7 +44,7 @@ test.describe.serial("gestione eventi", () => {
 
   test("senza titolo non salva e mostra un errore", async ({ page }) => {
     await page.getByRole("button", { name: "Giorno", exact: true }).click();
-    await page.locator("#day-view").getByRole("button", { name: "+ Nuovo evento" }).click();
+    await page.locator("#time-view").getByRole("button", { name: "+ Nuovo evento" }).click();
     await page.getByRole("button", { name: "Salva", exact: true }).click();
 
     await expect(page.locator("#modal-error")).toHaveText("Il titolo è obbligatorio");
@@ -53,11 +53,13 @@ test.describe.serial("gestione eventi", () => {
 
   test("l'evento si vede nella vista settimana e nella vista giorno", async ({ page }) => {
     await page.getByRole("button", { name: "Settimana" }).click();
-    await expect(page.locator(".calendar-grid.week .day-cell")).toHaveCount(7);
-    await expect(page.locator(".day-cell.today .event-chip", { hasText: title })).toBeVisible();
+    // 7 colonne (da lunedì a domenica) con l'evento nella colonna di oggi
+    await expect(page.locator("#time-grid .time-col")).toHaveCount(7);
+    await expect(page.locator(".time-day-header")).toHaveCount(7);
+    await expect(page.locator(".time-col.today .day-event", { hasText: title })).toBeVisible();
 
     await page.getByRole("button", { name: "Giorno", exact: true }).click();
-    const block = page.locator("#day-timeline .day-event", { hasText: title });
+    const block = page.locator("#time-grid .day-event", { hasText: title });
     await expect(block).toBeVisible();
     await expect(block).toContainText("09:00 – 10:00");
     await expect(block).toContainText("Controllo annuale");
@@ -68,13 +70,22 @@ test.describe.serial("gestione eventi", () => {
 
   test("nella vista giorno, cliccando su un'ora si crea un evento a quell'ora", async ({ page }) => {
     await page.getByRole("button", { name: "Giorno", exact: true }).click();
-    // Riga delle 14:00 (click a destra, lontano dall'etichetta dell'ora)
-    await page.locator(".hour-row").nth(14).click({ position: { x: 300, y: 30 } });
+    // Click nella colonna del giorno all'altezza delle 14:00 (14 ore x 60px + mezz'ora)
+    await page.locator(".time-col").click({ position: { x: 300, y: 14 * 60 + 30 } });
 
     await expect(page.locator("#modal-title")).toHaveText("Nuovo evento");
     await expect(page.locator("#event-start")).toHaveValue(/T14:00$/);
     await expect(page.locator("#event-end")).toHaveValue(/T15:00$/);
     await page.getByRole("button", { name: "Annulla" }).click();
+  });
+
+  test("dalla settimana, cliccando sul giorno si apre la vista giorno", async ({ page }) => {
+    await page.getByRole("button", { name: "Settimana" }).click();
+    await page.locator(".time-day-header.today").click();
+
+    await expect(page.getByRole("button", { name: "Giorno", exact: true })).toHaveClass(/active/);
+    await expect(page.locator("#time-grid .time-col")).toHaveCount(1);
+    await expect(page.locator("#time-grid .day-event", { hasText: title })).toBeVisible();
   });
 
   test("nella lista i filtri mostrano l'evento di oggi", async ({ page }) => {
@@ -99,7 +110,7 @@ test.describe.serial("gestione eventi", () => {
     await page.getByRole("button", { name: "Salva", exact: true }).click();
 
     await page.getByRole("button", { name: "Giorno", exact: true }).click();
-    const block = page.locator("#day-timeline .day-event", { hasText: newTitle });
+    const block = page.locator("#time-grid .day-event", { hasText: newTitle });
     await expect(block).toContainText("15:00 – 16:30");
     // Un'ora e mezza = 90px
     await expect(block).toHaveCSS("height", "90px");

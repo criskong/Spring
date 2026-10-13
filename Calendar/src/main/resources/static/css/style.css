@@ -947,18 +947,7 @@ body {
     font-size: 14px;
 }
 
-/* ─── VISTA SETTIMANA ─── */
-
-/* Una riga per le label e una sola riga di giorni che occupa tutto lo spazio */
-.calendar-grid.week {
-    grid-template-rows: auto 1fr;
-}
-
-.calendar-grid.week .day-cell {
-    overflow-y: auto;
-}
-
-/* Il numero del giorno è cliccabile e apre la vista giorno */
+/* Il numero del giorno nella vista mese è cliccabile e apre la vista giorno */
 .day-num {
     cursor: pointer;
 }
@@ -967,41 +956,103 @@ body {
     background: var(--bg-tertiary);
 }
 
-/* ─── VISTA GIORNO ─── */
+/* ─── VISTA SETTIMANA / GIORNO (GRIGLIA ORARIA) ─── */
 
-.day-view {
+.time-view {
     flex: 1;
     min-height: 0;
-    max-width: 900px;
-    width: 100%;
     display: flex;
     flex-direction: column;
     gap: 12px;
 }
 
-.day-view .btn-add {
+.time-view .btn-add {
     align-self: flex-start;
 }
 
-/* Fascia con gli eventi "tutto il giorno" */
-.day-allday {
+/* Riquadro che contiene header, "tutto il giorno" e ore */
+.time-box {
+    flex: 1;
+    min-height: 0;
     display: flex;
     flex-direction: column;
-    gap: 4px;
-    padding-left: 60px;
-}
-
-.day-allday .day-event {
-    position: static;
-}
-
-/* Griglia oraria: è lei a scorrere, non tutta la pagina */
-.day-timeline {
-    flex: 1;
-    overflow-y: auto;
     background: var(--bg-secondary);
     border: 1px solid var(--border);
     border-radius: var(--radius-lg);
+    overflow: hidden;
+}
+
+/* Header e "tutto il giorno" riservano lo stesso spazio della scrollbar
+   della griglia, così le colonne restano allineate */
+.time-header,
+.time-allday {
+    display: grid;
+    overflow: hidden;
+    scrollbar-gutter: stable;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.time-day-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 8px 0;
+    cursor: pointer;
+    border-left: 1px solid var(--border);
+}
+
+.time-day-header:hover {
+    background: var(--bg-hover);
+}
+
+.time-day-header .weekday {
+    font-size: 11px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+}
+
+.time-day-header .day-number {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+}
+
+.time-day-header.today .day-number {
+    background: var(--accent);
+    color: #fff;
+}
+
+.allday-title {
+    font-size: 10px;
+    color: var(--text-muted);
+    text-align: right;
+    padding: 6px 8px 6px 0;
+}
+
+.allday-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 4px;
+    border-left: 1px solid var(--border);
+    min-width: 0;
+}
+
+.allday-cell .day-event {
+    position: static;
+}
+
+/* Griglia con le ore: è lei a scorrere, non tutta la pagina */
+.time-grid {
+    flex: 1;
+    overflow-y: auto;
+    scrollbar-gutter: stable;
 }
 
 .timeline-inner {
@@ -1013,15 +1064,10 @@ body {
     left: 0;
     right: 0;
     border-top: 1px solid var(--border);
-    cursor: pointer;
 }
 
 .hour-row:first-child {
     border-top: none;
-}
-
-.hour-row:hover {
-    background: var(--bg-hover);
 }
 
 .hour-label {
@@ -1034,6 +1080,19 @@ body {
     color: var(--text-muted);
 }
 
+/* Colonna di un giorno: cliccando uno spazio vuoto si crea un evento a quell'ora */
+.time-col {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    border-left: 1px solid var(--border);
+    cursor: pointer;
+}
+
+.time-col.today {
+    background: rgba(59, 130, 246, 0.05);
+}
+
 /* Blocco di un evento posizionato in base all'orario */
 .day-event {
     position: absolute;
@@ -1044,6 +1103,7 @@ body {
     cursor: pointer;
     transition: filter 0.15s;
     z-index: 1;
+    margin-left: 2px;
 }
 
 .day-event:hover {
@@ -1071,7 +1131,7 @@ body {
 /* Linea rossa sull'ora attuale */
 .now-line {
     position: absolute;
-    left: 56px;
+    left: 0;
     right: 0;
     height: 2px;
     background: var(--danger);
@@ -1088,6 +1148,16 @@ body {
     height: 10px;
     border-radius: 50%;
     background: var(--danger);
+}
+
+/* Scrollbar scura e sottile, in tema con l'app.
+   Anche header e "tutto il giorno" la dichiarano sottile, così lo spazio riservato è uguale */
+.time-header,
+.time-allday,
+.time-grid,
+#event-list-view {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-light) transparent;
 }
 
 /* ─── FILTRI LISTA ─── */
@@ -1123,9 +1193,11 @@ body {
 /* ─── MOBILE: VISTE ─── */
 
 @media (max-width: 480px) {
-    /* Nella vista settimana c'è più spazio verticale: mostro i titoli invece del pallino */
-    .calendar-grid.week .event-chip { display: block; }
-    .calendar-grid.week .day-cell.has-events::after { display: none; }
+    /* Settimana su telefono: colonne strette, testo più piccolo */
+    .time-day-header .day-number { font-size: 14px; width: 26px; height: 26px; }
+    .day-event { padding: 2px 4px; }
+    .day-event .title { font-size: 11px; }
+    .day-event .time, .day-event .desc { font-size: 10px; }
 
     .vt-btn { padding: 6px 10px; }
 }
