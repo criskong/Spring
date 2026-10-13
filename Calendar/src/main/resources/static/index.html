@@ -104,17 +104,19 @@
 
             <!-- MAIN CONTENT -->
             <main class="main-content">
-                <div class="main-header">
+                <div class="main-header" id="main-header">
                     <div class="header-left">
                         <div class="nav-arrows">
-                            <button class="arr-btn" onclick="prevMonth()">‹</button>
-                            <button class="arr-btn" onclick="nextMonth()">›</button>
+                            <button class="arr-btn" onclick="prevPeriod()">‹</button>
+                            <button class="arr-btn" onclick="nextPeriod()">›</button>
                         </div>
                         <h1 class="month-title" id="month-title"></h1>
                         <button class="btn-today" onclick="goToday()">Oggi</button>
                     </div>
                     <div class="view-toggle">
-                        <button class="vt-btn active">Mese</button>
+                        <button class="vt-btn active" data-view="month" onclick="setView('month')">Mese</button>
+                        <button class="vt-btn" data-view="week" onclick="setView('week')">Settimana</button>
+                        <button class="vt-btn" data-view="day" onclick="setView('day')">Giorno</button>
                     </div>
                 </div>
 
@@ -129,13 +131,28 @@
                     <div class="day-label">Dom</div>
                 </div>
 
+                <!-- VISTA GIORNO -->
+                <div id="day-view" class="day-view hidden">
+                    <button class="btn-add" onclick="openEventModal(currentDate)">+ Nuovo evento</button>
+                    <!-- Eventi "tutto il giorno" -->
+                    <div id="day-allday" class="day-allday"></div>
+                    <!-- Griglia con le ore: viene riempita da renderDayView() -->
+                    <div id="day-timeline" class="day-timeline"></div>
+                </div>
+
                 <!-- LISTA EVENTI -->
                 <div id="event-list-view" class="hidden">
                     <div class="event-list-header">
                         <h2>I miei eventi</h2>
                         <button class="btn-secondary" onclick="showCalendar()">← Torna al calendario</button>
                     </div>
-                    <div id="event-list-container"></div>
+                    <div class="list-filters">
+                        <button class="filter-btn active" data-filter="all" onclick="setListFilter('all')">Tutti</button>
+                        <button class="filter-btn" data-filter="month" onclick="setListFilter('month')">Questo mese</button>
+                        <button class="filter-btn" data-filter="week" onclick="setListFilter('week')">Questa settimana</button>
+                        <button class="filter-btn" data-filter="day" onclick="setListFilter('day')">Oggi</button>
+                    </div>
+                    <div id="event-list-container" class="event-list-container"></div>
                 </div>
 
             </main>

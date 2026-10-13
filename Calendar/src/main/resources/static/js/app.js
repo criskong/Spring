@@ -135,7 +135,8 @@ function toggleSidebar() {
 
 let selectedColor = '#3b82f6';
 
-function openEventModal(date, event = null) {
+// hour = ora di inizio proposta per un nuovo evento (di default le 9:00)
+function openEventModal(date, event = null, hour = 9) {
     clearErrors();
     selectedColor = '#3b82f6';
 
@@ -174,9 +175,9 @@ function openEventModal(date, event = null) {
 
         if (date) {
             const start = new Date(date);
-            start.setHours(9, 0, 0, 0);
+            start.setHours(hour, 0, 0, 0);
             const end = new Date(date);
-            end.setHours(10, 0, 0, 0);
+            end.setHours(hour + 1, 0, 0, 0);
             document.getElementById('event-start').value = formatDatetimeLocal(start);
             document.getElementById('event-end').value = formatDatetimeLocal(end);
         } else {
@@ -291,9 +292,12 @@ async function deleteEvent() {
 // ─── VISTA LISTA ───
 
 let currentDaySelected = null;
+let listFilter = 'all'; // 'all', 'month', 'week' oppure 'day'
 
 function showEventList() {
     document.getElementById('calendar-grid').classList.add('hidden');
+    document.getElementById('day-view').classList.add('hidden');
+    document.getElementById('main-header').classList.add('hidden');
     document.getElementById('event-list-view').classList.remove('hidden');
     document.getElementById('btn-list').classList.add('active');
     document.querySelector('.nav-btn.active:not(#btn-list)')?.classList.remove('active');
@@ -306,10 +310,40 @@ function showEventList() {
 }
 
 function showCalendar() {
-    document.getElementById('calendar-grid').classList.remove('hidden');
+    document.getElementById('main-header').classList.remove('hidden');
     document.getElementById('event-list-view').classList.add('hidden');
     document.getElementById('btn-list').classList.remove('active');
     document.getElementById('btn-calendar').classList.add('active');
+
+    // renderCalendar mostra la griglia o la vista giorno in base alla vista attiva
+    renderCalendar();
+}
+
+function setListFilter(filter) {
+    listFilter = filter;
+    document.querySelectorAll('.filter-btn').forEach(b => {
+        b.classList.toggle('active', b.dataset.filter === filter);
+    });
+    renderEventList();
+}
+
+// Controlla se l'evento rientra nel filtro scelto (oggi, questa settimana, questo mese)
+function matchesListFilter(ev) {
+    const start = new Date(ev.startTime);
+    const today = new Date();
+
+    if (listFilter === 'day') {
+        return isSameDay(start, today);
+    }
+    if (listFilter === 'week') {
+        const weekStart = getWeekStart(today);
+        const weekEnd = addDays(weekStart, 7);
+        return start >= weekStart && start < weekEnd;
+    }
+    if (listFilter === 'month') {
+        return start.getFullYear() === today.getFullYear() && start.getMonth() === today.getMonth();
+    }
+    return true; // 'all'
 }
 
 function renderEventList() {
@@ -321,33 +355,73 @@ function renderEventList() {
         return;
     }
 
-    // Ordina per data
-    const sorted = [...allEvents].sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
+    // Filtra e ordina per data
+    const events = allEvents
+        .filter(matchesListFilter)
+        .sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
 
-    sorted.forEach(ev => {
-        const start = new Date(ev.startTime);
-        const item = document.createElement('div');
-        item.className = 'event-list-item';
-        item.style.borderLeftColor = ev.color || '#3b82f6';
+    if (events.length === 0) {
+        container.innerHTML = `<div class="event-list-empty">Nessun evento in questo periodo.</div>`;
+        return;
+    }
 
-        const day = start.getDate();
-        const month = start.toLocaleDateString('it-IT', { month: 'short' });
-        const time = ev.allDay ? 'Tutto il giorno' : start.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+    let lastMonth = '';
 
-        item.innerHTML = `
-            <div class="event-list-date">
-                <div class="day">${day}</div>
-                <div class="month">${month}</div>
-            </div>
-            <div class="event-list-info">
-                <div class="title">${escapeHtml(ev.title)}</div>
-                <div class="time">${time}${ev.description ? ' — ' + escapeHtml(ev.description) : ''}</div>
-            </div>
-        `;
+    events.forEach(ev => {
+        // Intestazione del mese quando cambia (es. "Ottobre 2026")
+        const monthLabel = formatMonthYear(new Date(ev.startTime));
+        if (monthLabel !== lastMonth) {
+            const header = document.createElement('div');
+            header.className = 'event-list-month';
+            header.textContent = monthLabel;
+            container.appendChild(header);
+            lastMonth = monthLabel;
+        }
 
-        item.addEventListener('click', () => openEventModal(start, ev));
-        container.appendChild(item);
+        container.appendChild(createEventCard(ev));
     });
+}
+
+// Card di un evento, usata sia nella lista che nella vista giorno
+function createEventCard(ev) {
+    const start = new Date(ev.startTime);
+    const item = document.createElement('div');
+    item.className = 'event-list-item';
+    item.style.borderLeftColor = ev.color || '#3b82f6';
+
+    // Evento passato: finito (o iniziato, se non ha una fine) prima di adesso
+    const end = ev.endTime ? new Date(ev.endTime) : start;
+    if (end < new Date()) item.classList.add('past');
+
+    const day = start.getDate();
+    const weekday = start.toLocaleDateString('it-IT', { weekday: 'short' });
+
+    item.innerHTML = `
+        <div class="event-list-date">
+            <div class="day">${day}</div>
+            <div class="month">${weekday}</div>
+        </div>
+        <div class="event-list-info">
+            <div class="title">${escapeHtml(ev.title)}</div>
+            <div class="time">${formatEventTime(ev)}</div>
+            ${ev.description ? `<div class="desc">${escapeHtml(ev.description)}</div>` : ''}
+        </div>
+    `;
+
+    item.addEventListener('click', () => openEventModal(start, ev));
+    return item;
+}
+
+// Orario dell'evento: "Tutto il giorno", "09:00" oppure "09:00 – 10:00"
+function formatEventTime(ev) {
+    if (ev.allDay) return 'Tutto il giorno';
+
+    const options = { hour: '2-digit', minute: '2-digit' };
+    const start = new Date(ev.startTime).toLocaleTimeString('it-IT', options);
+    if (!ev.endTime) return start;
+
+    const end = new Date(ev.endTime).toLocaleTimeString('it-IT', options);
+    return `${start} – ${end}`;
 }
 
 // ─── DAY MODAL ───

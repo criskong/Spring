@@ -680,8 +680,9 @@ body {
         background: var(--accent);
         margin: 2px auto;
     }
+}
 
-    /* ─── TOGGLE SWITCH ─── */
+/* ─── TOGGLE SWITCH ─── */
 
 .toggle-switch {
     display: flex;
@@ -793,6 +794,13 @@ body {
 
 /* ─── LISTA EVENTI ─── */
 
+#event-list-view {
+    flex: 1;
+    overflow-y: auto;
+    max-width: 720px;
+    width: 100%;
+}
+
 .event-list-header {
     display: flex;
     align-items: center;
@@ -811,6 +819,20 @@ body {
     display: flex;
     flex-direction: column;
     gap: 10px;
+    padding-bottom: 24px;
+}
+
+.event-list-month {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 12px;
+}
+
+.event-list-month:first-child {
+    margin-top: 0;
 }
 
 .event-list-item {
@@ -827,12 +849,19 @@ body {
 }
 
 .event-list-item:hover {
-    border-color: var(--accent);
+    background: var(--bg-tertiary);
+}
+
+/* Eventi già passati più spenti */
+.event-list-item.past {
+    opacity: 0.5;
 }
 
 .event-list-date {
     text-align: center;
     min-width: 48px;
+    padding-right: 16px;
+    border-right: 1px solid var(--border-light);
 }
 
 .event-list-date .day {
@@ -851,6 +880,7 @@ body {
 
 .event-list-info {
     flex: 1;
+    min-width: 0;
 }
 
 .event-list-info .title {
@@ -863,6 +893,15 @@ body {
 .event-list-info .time {
     font-size: 12px;
     color: var(--text-secondary);
+}
+
+.event-list-info .desc {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-top: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .event-list-empty {
@@ -907,4 +946,186 @@ body {
     color: var(--text-secondary);
     font-size: 14px;
 }
+
+/* ─── VISTA SETTIMANA ─── */
+
+/* Una riga per le label e una sola riga di giorni che occupa tutto lo spazio */
+.calendar-grid.week {
+    grid-template-rows: auto 1fr;
+}
+
+.calendar-grid.week .day-cell {
+    overflow-y: auto;
+}
+
+/* Il numero del giorno è cliccabile e apre la vista giorno */
+.day-num {
+    cursor: pointer;
+}
+
+.day-num:hover {
+    background: var(--bg-tertiary);
+}
+
+/* ─── VISTA GIORNO ─── */
+
+.day-view {
+    flex: 1;
+    min-height: 0;
+    max-width: 900px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.day-view .btn-add {
+    align-self: flex-start;
+}
+
+/* Fascia con gli eventi "tutto il giorno" */
+.day-allday {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding-left: 60px;
+}
+
+.day-allday .day-event {
+    position: static;
+}
+
+/* Griglia oraria: è lei a scorrere, non tutta la pagina */
+.day-timeline {
+    flex: 1;
+    overflow-y: auto;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+}
+
+.timeline-inner {
+    position: relative;
+}
+
+.hour-row {
+    position: absolute;
+    left: 0;
+    right: 0;
+    border-top: 1px solid var(--border);
+    cursor: pointer;
+}
+
+.hour-row:first-child {
+    border-top: none;
+}
+
+.hour-row:hover {
+    background: var(--bg-hover);
+}
+
+.hour-label {
+    position: absolute;
+    left: 0;
+    top: 4px;
+    width: 52px;
+    text-align: right;
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+/* Blocco di un evento posizionato in base all'orario */
+.day-event {
+    position: absolute;
+    border-left: 4px solid;
+    border-radius: var(--radius-sm);
+    padding: 4px 8px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: filter 0.15s;
+    z-index: 1;
+}
+
+.day-event:hover {
+    filter: brightness(1.2);
+}
+
+.day-event .title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.day-event .time,
+.day-event .desc {
+    font-size: 11px;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Linea rossa sull'ora attuale */
+.now-line {
+    position: absolute;
+    left: 56px;
+    right: 0;
+    height: 2px;
+    background: var(--danger);
+    z-index: 2;
+    pointer-events: none;
+}
+
+.now-line::before {
+    content: '';
+    position: absolute;
+    left: -5px;
+    top: -4px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--danger);
+}
+
+/* ─── FILTRI LISTA ─── */
+
+.list-filters {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+}
+
+.filter-btn {
+    padding: 6px 14px;
+    border-radius: 999px;
+    border: 1px solid var(--border-light);
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.filter-btn:hover {
+    border-color: var(--accent);
+}
+
+.filter-btn.active {
+    background: #1d3461;
+    border-color: #1d3461;
+    color: #60a5fa;
+}
+
+/* ─── MOBILE: VISTE ─── */
+
+@media (max-width: 480px) {
+    /* Nella vista settimana c'è più spazio verticale: mostro i titoli invece del pallino */
+    .calendar-grid.week .event-chip { display: block; }
+    .calendar-grid.week .day-cell.has-events::after { display: none; }
+
+    .vt-btn { padding: 6px 10px; }
 }
