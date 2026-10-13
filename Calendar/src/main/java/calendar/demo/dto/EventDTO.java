@@ -20,5 +20,6 @@ public class EventDTO {
 
     private boolean allDay;
 
+    @Pattern(regexp = "^#[0-9a-fA-F]{6}$", message = "Colore non valido")
     private String color;
 }
