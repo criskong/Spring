@@ -1,0 +1,41 @@
+# Esegue i test di CalendarApp su GitHub ad ogni push e pull request
+name: Calendar Tests
+
+on:
+  push:
+    branches: [main]
+    # Parte solo se cambia qualcosa nel progetto Calendar (o in questo file)
+    paths:
+      - "Calendar/**"
+      - ".github/workflows/calendar-tests.yml"
+  pull_request:
+    paths:
+      - "Calendar/**"
+      - ".github/workflows/calendar-tests.yml"
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    # Tutti i comandi vengono eseguiti dentro la cartella Calendar
+    defaults:
+      run:
+        working-directory: Calendar
+
+    steps:
+      # 1. Scarica il codice del repository
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # 2. Installa Java 17 (la stessa versione usata dal progetto)
+      #    e salva in cache le dipendenze Maven per velocizzare le esecuzioni successive
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: maven
+
+      # 3. Compila ed esegue i test (usano H2, quindi non serve MySQL)
+      - name: Run tests
+        run: ./mvnw -B test

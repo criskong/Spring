@@ -1,5 +1,7 @@
 # 📅 CalendarApp
 
+[![Calendar Tests](https://github.com/criskong/Spring/actions/workflows/calendar-tests.yml/badge.svg)](https://github.com/criskong/Spring/actions/workflows/calendar-tests.yml)
+
 Web application per la gestione di impegni personali, sviluppata con **Spring Boot** e **MySQL**.
 
 🌐 **App live**: [https://calendar-ae4i.onrender.com](https://calendar-ae4i.onrender.com)
