@@ -124,8 +124,14 @@ function createDayCell(date, otherMonth) {
         cell.appendChild(chip);
     });
 
-    // Click su cella = nuovo evento
-    cell.addEventListener('click', () => openEventModal(date));
+    // Click su cella: su mobile mostra il day modal se ci sono eventi, altrimenti nuovo evento
+    cell.addEventListener('click', () => {
+        if (window.innerWidth <= 480 && dayEvents.length > 0) {
+            openDayModal(date, dayEvents);
+        } else {
+            openEventModal(date);
+        }
+    });
 
     return cell;
 }
@@ -194,15 +200,11 @@ function createMiniDay(date, otherMonth) {
     if (isSameDay(date, today)) div.classList.add('today');
     div.textContent = date.getDate();
 
-cell.addEventListener('click', () => {
-    const dayEvents = getEventsForDay(date);
-    // Su mobile mostra il day modal se ci sono eventi
-    if (window.innerWidth <= 480 && dayEvents.length > 0) {
-        openDayModal(date, dayEvents);
-    } else {
-        openEventModal(date);
-    }
-});
+    // Click su un giorno = sposta il calendario principale su quel mese
+    div.addEventListener('click', () => {
+        currentDate = new Date(date);
+        renderCalendar();
+    });
 
     return div;
 }

@@ -43,6 +43,13 @@ function clearErrors() {
     });
 }
 
+// Evita che testo scritto dall'utente venga interpretato come HTML (XSS)
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
 function showError(id, msg) {
     const el = document.getElementById(id);
     el.textContent = msg;
@@ -279,8 +286,9 @@ async function deleteEvent() {
     } catch (e) {
         showError('modal-error', e.message);
     }
+}
 
-    // ─── VISTA LISTA ───
+// ─── VISTA LISTA ───
 
 let currentDaySelected = null;
 
@@ -301,6 +309,7 @@ function showCalendar() {
     document.getElementById('calendar-grid').classList.remove('hidden');
     document.getElementById('event-list-view').classList.add('hidden');
     document.getElementById('btn-list').classList.remove('active');
+    document.getElementById('btn-calendar').classList.add('active');
 }
 
 function renderEventList() {
@@ -331,8 +340,8 @@ function renderEventList() {
                 <div class="month">${month}</div>
             </div>
             <div class="event-list-info">
-                <div class="title">${ev.title}</div>
-                <div class="time">${time}${ev.description ? ' — ' + ev.description : ''}</div>
+                <div class="title">${escapeHtml(ev.title)}</div>
+                <div class="time">${time}${ev.description ? ' — ' + escapeHtml(ev.description) : ''}</div>
             </div>
         `;
 
@@ -364,7 +373,7 @@ function openDayModal(date, events) {
 
             item.innerHTML = `
                 <div class="day-event-info">
-                    <div class="title">${ev.title}</div>
+                    <div class="title">${escapeHtml(ev.title)}</div>
                     <div class="time">${time}</div>
                 </div>
             `;
@@ -383,5 +392,4 @@ function openDayModal(date, events) {
 
 function closeDayModal() {
     document.getElementById('day-modal').classList.add('hidden');
-}
 }
