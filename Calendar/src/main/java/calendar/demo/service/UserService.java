@@ -1,10 +1,10 @@
-package Calendar.demo.service;
+package calendar.demo.service;
 
-import Calendar.demo.config.JwtService;
-import Calendar.demo.dto.LoginDTO;
-import Calendar.demo.dto.RegisterDTO;
-import Calendar.demo.model.User;
-import Calendar.demo.repository.UserRepository;
+import calendar.demo.config.JwtService;
+import calendar.demo.dto.LoginDTO;
+import calendar.demo.dto.RegisterDTO;
+import calendar.demo.model.User;
+import calendar.demo.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;

@@ -1,4 +1,4 @@
-package Calendar.demo.config;
+package calendar.demo.config;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;

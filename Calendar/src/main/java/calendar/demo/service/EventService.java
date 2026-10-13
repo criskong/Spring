@@ -1,10 +1,10 @@
-package Calendar.demo.service;
+package calendar.demo.service;
 
-import Calendar.demo.dto.EventDTO;
-import Calendar.demo.model.Event;
-import Calendar.demo.model.User;
-import Calendar.demo.repository.EventRepository;
-import Calendar.demo.repository.UserRepository;
+import calendar.demo.dto.EventDTO;
+import calendar.demo.model.Event;
+import calendar.demo.model.User;
+import calendar.demo.repository.EventRepository;
+import calendar.demo.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

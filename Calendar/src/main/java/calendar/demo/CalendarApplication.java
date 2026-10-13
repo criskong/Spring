@@ -1,13 +1,13 @@
-package Calendar.demo;
+package calendar.demo;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class Calendar {
+public class CalendarApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(Calendar.class, args);
+		SpringApplication.run(CalendarApplication.class, args);
 	}
 
 }

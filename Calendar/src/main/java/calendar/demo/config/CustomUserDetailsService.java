@@ -1,6 +1,6 @@
-package Calendar.demo.config;
+package calendar.demo.config;
 
-import Calendar.demo.repository.UserRepository;
+import calendar.demo.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -15,7 +15,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Calendar.demo.model.User user = userRepository.findByUsername(username)
+        calendar.demo.model.User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("Utente non trovato: " + username));
 
         return org.springframework.security.core.userdetails.User

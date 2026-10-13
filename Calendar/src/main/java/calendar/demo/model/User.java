@@ -1,4 +1,4 @@
-package Calendar.demo.model;
+package calendar.demo.model;
 
 import jakarta.persistence.*;
 import lombok.*;

@@ -1,4 +1,4 @@
-package Calendar.demo.dto;
+package calendar.demo.dto;
 
 import lombok.Data;
 import jakarta.validation.constraints.*;

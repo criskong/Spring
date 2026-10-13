@@ -1,6 +1,6 @@
-package Calendar.demo.repository;
+package calendar.demo.repository;
 
-import Calendar.demo.model.User;
+import calendar.demo.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

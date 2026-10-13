@@ -1,8 +1,8 @@
-package Calendar.demo.controller;
+package calendar.demo.controller;
 
-import Calendar.demo.dto.LoginDTO;
-import Calendar.demo.dto.RegisterDTO;
-import Calendar.demo.service.UserService;
+import calendar.demo.dto.LoginDTO;
+import calendar.demo.dto.RegisterDTO;
+import calendar.demo.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

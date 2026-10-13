@@ -1,8 +1,8 @@
-package Calendar.demo.controller;
+package calendar.demo.controller;
 
-import Calendar.demo.dto.EventDTO;
-import Calendar.demo.model.Event;
-import Calendar.demo.service.EventService;
+import calendar.demo.dto.EventDTO;
+import calendar.demo.model.Event;
+import calendar.demo.service.EventService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;

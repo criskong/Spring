@@ -1,4 +1,4 @@
-package Calendar.demo.config;
+package calendar.demo.config;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
