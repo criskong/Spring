@@ -1,0 +1,17 @@
+{
+  "name": "calendar-e2e",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Test end-to-end nel browser per CalendarApp",
+  "scripts": {
+    "test:e2e": "playwright test --project=veloce",
+    "test:e2e:slow": "playwright test --project=lento --headed",
+    "test:e2e:headed": "playwright test --project=veloce --headed",
+    "test:e2e:ui": "playwright test --project=lento --ui",
+    "test:e2e:report": "playwright show-report"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.64.0",
+    "@types/node": "^22.9.0"
+  }
+}

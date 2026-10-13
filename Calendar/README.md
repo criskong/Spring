@@ -15,7 +15,7 @@ Web application per la gestione di impegni personali, sviluppata con **Spring Bo
 - **Frontend**: HTML5, CSS3, JavaScript (vanilla)
 - **ORM**: Hibernate / Spring Data JPA
 - **Build**: Maven
-- **Test**: JUnit 5, Mockito, MockMvc, H2
+- **Test**: JUnit 5, Mockito, MockMvc, H2, Playwright
 - **Deploy**: Render (backend + frontend) + Clever Cloud (database)
 
 ## ✨ Funzionalità
@@ -107,6 +107,24 @@ src/test/java/calendar/demo/
 - **Unit test**: testano la logica dei service in isolamento, sostituendo repository e dipendenze con dei mock
 - **Test del repository**: verificano che le query restituiscano solo gli eventi giusti
 - **Test di integrazione**: simulano le chiamate HTTP e controllano status code, risposte JSON e sicurezza (token mancante, eventi di altri utenti...)
+
+### Test end-to-end (Playwright)
+
+Nella cartella `e2e/` ci sono i test che usano l'app **nel browser**, come farebbe un utente: login, creazione di un evento, viste mese/settimana/giorno, filtri della lista, modifica ed eliminazione.
+
+Di default avviano l'app in locale con H2 (profilo `e2e`), quindi non serve MySQL. Gli eventi creati dai test vengono cancellati alla fine.
+
+```bash
+cd e2e
+npm install
+cp .env.example .env.local      # inserisci le credenziali dell'account di prova
+
+npm run test:e2e                # veloce
+npm run test:e2e:slow           # lento, con il browser visibile (1 secondo tra un'azione e l'altra)
+npm run test:e2e:report         # report HTML con video e screenshot di ogni test
+```
+
+Impostando `E2E_BASE_URL` in `.env.local` gli stessi test girano sull'app online.
 
 ## 🔌 API Endpoints
 
